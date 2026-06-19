@@ -1,0 +1,204 @@
+{% extends 'myworld/base.html' %}
+{% load static %}
+
+{% block title %}Global World - Public saved items feed{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5">
+    
+    <!-- Title Section -->
+    <div class="mb-4">
+        <h1 class="fw-800 text-white mb-1"><i class="bi bi-globe-americas text-primary me-2"></i>Global World</h1>
+        <p class="text-muted mb-0">Explore what the community is saving and wishing for.</p>
+    </div>
+
+    <!-- Search & Platform Filters -->
+    <div class="row mb-4 align-items-center g-3">
+        <!-- Search bar -->
+        <div class="col-md-4 col-lg-3">
+            <form action="{% url 'global_world' %}" method="GET">
+                {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                {% if selected_platform %}<input type="hidden" name="platform" value="{{ selected_platform }}">{% endif %}
+                <div class="input-group">
+                    <input type="text" name="q" value="{{ query }}" class="form-control glass-input" placeholder="Search title, desc, or user...">
+                    <button type="submit" class="btn btn-primary-custom btn-sm"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Platform filter -->
+        <div class="col-md-8 col-lg-9">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <a href="?q={{ query }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+                   class="tag-btn {% if not selected_platform %}active{% endif %}">All Platforms</a>
+                {% for platform in platforms %}
+                    <a href="?platform={{ platform }}&q={{ query }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+                       class="tag-btn {% if selected_platform == platform %}active{% endif %}">{{ platform }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Filter Tags -->
+    <div class="filter-tags mb-4">
+        <a href="?q={{ query }}{% if selected_platform %}&platform={{ selected_platform }}{% endif %}" 
+           class="tag-btn {% if not selected_category %}active{% endif %}">All Categories</a>
+        {% for cat in categories %}
+            <a href="?category={{ cat }}&q={{ query }}{% if selected_platform %}&platform={{ selected_platform }}{% endif %}" 
+               class="tag-btn {% if selected_category == cat %}active{% endif %}">{{ cat }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Feed Grid -->
+    {% if items %}
+        <div class="pins-grid">
+            {% for item in items %}
+                <div class="pin-item">
+                    <div class="glass-card">
+                        
+                        <!-- User header info -->
+                        <div class="p-3 d-flex align-items-center justify-content-between border-bottom" style="border-color: var(--border-color) !important; background: rgba(0,0,0,0.15);">
+                            <a href="{% url 'profile_view' item.user.username %}" class="d-flex align-items-center gap-2 text-decoration-none text-white">
+                                {% if item.user.profile.profile_picture %}
+                                    <img src="{{ item.user.profile.profile_picture.url }}" alt="avatar" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+                                {% else %}
+                                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="avatar" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+                                {% endif %}
+                                <span class="fw-600 fs-7">{{ item.user.username }}</span>
+                            </a>
+                            
+                            <!-- Follow Toggle button -->
+                            {% if item.user != request.user %}
+                                <button class="follow-btn-toggle follow-btn btn-sm py-1 px-3 {% if item.user.profile.id in followed_user_ids %}following{% endif %}" 
+                                        data-username="{{ item.user.username }}">
+                                    {% if item.user.profile.id in followed_user_ids %}Following{% else %}Follow{% endif %}
+                                </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- Card Image -->
+                        <div class="card-img-container">
+                            <span class="platform-badge platform-{{ item.platform|lower }}">
+                                {{ item.platform }}
+                            </span>
+                            
+                            {% if item.image_url %}
+                                <img src="{{ item.image_url }}" alt="{{ item.title }}" class="card-img-top-custom">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=600&auto=format&fit=crop" alt="Placeholder" class="card-img-top-custom">
+                            {% endif %}
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="p-3">
+                            <h5 class="card-title-custom" title="{{ item.title }}">{{ item.title }}</h5>
+                            <p class="card-desc-custom">{{ item.description|default:"No description provided." }}</p>
+                            
+                            <!-- Price & category -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge" style="background-color: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-secondary);">
+                                    <i class="bi bi-tag-fill me-1"></i>{{ item.category }}
+                                </span>
+                                {% if item.price %}
+                                    <span class="card-price-custom">₹{{ item.price }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Interaction Actions -->
+                            <div class="interaction-bar pt-2">
+                                <!-- Like button (AJAX) -->
+                                <button class="interaction-btn like-btn {% if item.id in user_liked_item_ids %}liked{% endif %}" data-item-id="{{ item.id }}">
+                                    <i class="bi {% if item.id in user_liked_item_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                    <span class="like-count">{{ item.like_count }}</span>
+                                </button>
+
+                                <!-- Comment Button (modal trigger) -->
+                                <button class="interaction-btn" data-bs-toggle="modal" data-bs-target="#commentsModal-{{ item.id }}">
+                                    <i class="bi bi-chat-text"></i>
+                                    <span id="commentCountBadge-{{ item.id }}">{{ item.comment_count }}</span>
+                                </button>
+
+                                <!-- Open link -->
+                                <a href="{{ item.url }}" target="_blank" class="btn btn-secondary-custom btn-sm py-1 px-3 d-flex align-items-center gap-1" style="font-size: 0.8rem;">
+                                    <i class="bi bi-box-arrow-up-right"></i> Open Link
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Comment Thread Modal -->
+                <div class="modal fade" id="commentsModal-{{ item.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content glass-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+                            <div class="modal-header border-bottom-0 pb-0">
+                                <h5 class="modal-title fw-700 text-white"><i class="bi bi-chat-text-fill me-2 text-primary"></i>Comments (<span id="modalCommentCount-{{ item.id }}">{{ item.comment_count }}</span>)</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body py-3">
+                                <!-- Item details summary in modal -->
+                                <div class="d-flex gap-3 mb-3 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                                    {% if item.image_url %}
+                                        <img src="{{ item.image_url }}" alt="item thumbnail" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="text-white fw-700 mb-1">{{ item.title }}</h6>
+                                        <p class="text-muted small mb-0">{{ item.description|truncatewords:10 }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Comments List -->
+                                <div class="comments-list-container mb-3" id="commentsList-{{ item.id }}">
+                                    {% if item.comments.all %}
+                                        {% for comment in item.comments.all %}
+                                            <div class="d-flex mb-3 align-items-start">
+                                                {% if comment.user.profile.profile_picture %}
+                                                    <img src="{{ comment.user.profile.profile_picture.url }}" alt="avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover; border: 1px solid var(--border-color);">
+                                                {% else %}
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover; border: 1px solid var(--border-color);">
+                                                {% endif %}
+                                                <div class="p-2 glass-card flex-grow-1" style="background: rgba(255,255,255,0.03); border-radius: 12px; font-size: 0.85rem;">
+                                                    <div class="d-flex justify-content-between">
+                                                        <strong>{{ comment.user.username }}</strong>
+                                                        <small class="text-muted" style="font-size: 0.75rem;">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                                                    </div>
+                                                    <div class="mt-1">{{ comment.content }}</div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div id="noComments-{{ item.id }}" class="text-center py-4 text-muted">
+                                            <i class="bi bi-chat-left-dots fs-3 mb-2 d-block"></i>
+                                            <span>No comments yet. Be the first to share your thoughts!</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- New Comment Form -->
+                                <form class="comment-form" data-item-id="{{ item.id }}">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control glass-input comment-input" placeholder="Write a comment..." required autocomplete="off">
+                                        <button class="btn btn-primary-custom" type="submit"><i class="bi bi-send-fill"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5 my-5 glass-card" style="padding: 60px;">
+            <i class="bi bi-globe-americas display-3 text-muted mb-4 d-block"></i>
+            <h3 class="fw-700 text-white mb-2">No Public Items Available</h3>
+            <p class="text-muted mx-auto mb-4" style="max-width: 400px;">
+                We couldn't find any public saved items. Search another keyword or change your category filters.
+            </p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

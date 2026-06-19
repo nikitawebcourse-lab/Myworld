@@ -1,0 +1,31 @@
+{% extends 'myworld/base.html' %}
+
+{% block title %}Login - MyWorld{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+    <div class="glass-card p-5 w-100" style="max-width: 450px;">
+        <h2 class="fw-800 text-white text-center mb-4"><i class="bi bi-box-arrow-in-right me-2 text-primary"></i>Welcome Back</h2>
+        
+        <form action="{% url 'login' %}" method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="username" class="form-label text-white fw-600">Username</label>
+                <input type="text" name="username" id="username" class="form-control glass-input" placeholder="Enter your username" required>
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label text-white fw-600">Password</label>
+                <input type="password" name="password" id="password" class="form-control glass-input" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary-custom w-100 py-3 mt-2">Login</button>
+        </form>
+        
+        <div class="text-center mt-4">
+            <span class="text-muted">Don't have an account? </span>
+            <a href="{% url 'signup' %}" class="fw-600 text-decoration-none" style="color: var(--accent-color);">Sign Up</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,233 @@
+{% extends 'myworld/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Analytics - MyWorld{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="fw-800 text-white mb-1"><i class="bi bi-bar-chart-line text-primary me-2"></i>Dashboard</h1>
+        <p class="text-muted mb-0">Overview of your saved content, metrics, and library splits.</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5 text-white">
+        <div class="col-6 col-md-3">
+            <div class="glass-card stat-card">
+                <div class="stat-number">{{ total_saved }}</div>
+                <div class="stat-label">Total Saved</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="glass-card stat-card">
+                <div class="stat-number text-success">{{ public_items }}</div>
+                <div class="stat-label">Public Feed</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="glass-card stat-card">
+                <div class="stat-number text-danger">{{ private_items }}</div>
+                <div class="stat-label">Private Box</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="glass-card stat-card">
+                <div class="stat-number text-warning">{{ likes_received }}</div>
+                <div class="stat-label">Likes Received</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-5">
+        <!-- Category Doughnut Chart -->
+        <div class="col-md-6">
+            <div class="glass-card p-4 h-100">
+                <h4 class="fw-700 text-white mb-4 text-center">Items by Category</h4>
+                <div style="position: relative; height:280px; width:100%;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Bar Chart -->
+        <div class="col-md-6">
+            <div class="glass-card p-4 h-100">
+                <h4 class="fw-700 text-white mb-4 text-center">Items by Platform</h4>
+                <div style="position: relative; height:280px; width:100%;">
+                    <canvas id="platformChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Saves Activity -->
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card p-4 text-white">
+                <h4 class="fw-700 mb-4"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Saves</h4>
+                {% if recent_saves %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0" style="--bs-table-bg: transparent; --bs-table-border-color: var(--border-color);">
+                            <thead>
+                                <tr>
+                                    <th>Platform</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Visibility</th>
+                                    <th>Saved At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for save in recent_saves %}
+                                    <tr style="border-bottom: 1px solid var(--border-color);">
+                                        <td>
+                                            <span class="badge platform-{{ save.platform|lower }} py-1 px-2">
+                                                {{ save.platform }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ save.url }}" target="_blank" class="text-white text-decoration-none fw-600">
+                                                {{ save.title }} <i class="bi bi-box-arrow-up-right small text-muted ms-1"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary">{{ save.category }}</span>
+                                        </td>
+                                        <td>
+                                            {% if save.is_public %}
+                                                <span class="text-success"><i class="bi bi-eye-fill me-1"></i>Public</span>
+                                            {% else %}
+                                                <span class="text-danger"><i class="bi bi-eye-slash-fill me-1"></i>Private</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">{{ save.created_at|date:"Y-m-d H:i" }}</span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-emoji-smile fs-3 mb-2 d-block"></i>
+                        <span>No saved content yet. Go to <a href="{% url 'my_world' %}" class="text-primary text-decoration-none">My World</a> to save some links!</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parse category data
+        const catLabels = [{% for item in category_data %}"{{ item.category }}",{% endfor %}];
+        const catCounts = [{% for item in category_data %}{{ item.count }},{% endfor %}];
+        
+        // Parse platform data
+        const platLabels = [{% for item in platform_data %}"{{ item.platform }}",{% endfor %}];
+        const platCounts = [{% for item in platform_data %}{{ item.count }},{% endfor %}];
+
+        // Theme colors check
+        const isLightTheme = document.body.classList.contains('light-theme');
+        const textNormalColor = isLightTheme ? '#2d3748' : '#c5c6c7';
+        const gridBorderColor = isLightTheme ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+
+        // 1. Category Doughnut Chart
+        const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+        if (catLabels.length > 0) {
+            new Chart(ctxCategory, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catCounts,
+                        backgroundColor: [
+                            '#6f42c1', // purple
+                            '#10b981', // green
+                            '#3b82f6', // blue
+                            '#f59e0b', // orange
+                            '#ec4899', // pink
+                            '#ef4444'  // red
+                        ],
+                        borderWidth: 1,
+                        borderColor: isLightTheme ? '#ffffff' : '#1f2833'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: textNormalColor,
+                                font: { family: 'Outfit' }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            // Draw empty state on canvas
+            ctxCategory.font = '16px Outfit';
+            ctxCategory.fillStyle = textNormalColor;
+            ctxCategory.textAlign = 'center';
+            ctxCategory.fillText('Save links to view category breakdown', 150, 140);
+        }
+
+        // 2. Platform Bar Chart
+        const ctxPlatform = document.getElementById('platformChart').getContext('2d');
+        if (platLabels.length > 0) {
+            new Chart(ctxPlatform, {
+                type: 'bar',
+                data: {
+                    labels: platLabels,
+                    datasets: [{
+                        label: 'Saved Items',
+                        data: platCounts,
+                        backgroundColor: '#6f42c1',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: gridBorderColor },
+                            ticks: {
+                                color: textNormalColor,
+                                font: { family: 'Outfit' }
+                            }
+                        },
+                        y: {
+                            grid: { color: gridBorderColor },
+                            ticks: {
+                                color: textNormalColor,
+                                font: { family: 'Outfit' },
+                                stepSize: 1
+                            }
+                        }
+                    }
+                });
+        } else {
+            ctxPlatform.font = '16px Outfit';
+            ctxPlatform.fillStyle = textNormalColor;
+            ctxPlatform.textAlign = 'center';
+            ctxPlatform.fillText('Save links to view platform breakdown', 150, 140);
+        }
+    });
+</script>
+{% endblock %}

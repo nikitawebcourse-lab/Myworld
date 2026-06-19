@@ -1,0 +1,78 @@
+{% extends 'myworld/base.html' %}
+{% load static %}
+
+{% block title %}MyWorld - Save, Organize & Share Your Online Content{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="hero-section text-center text-white my-5">
+        <h1 class="display-3 fw-800 mb-3" style="letter-spacing: -1px;">
+            Save Everything. <br>Organise in <span style="background: linear-gradient(90deg, #9f7aea 0%, #ed64a6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Your World</span>.
+        </h1>
+        <p class="lead text-muted mx-auto mb-5" style="max-width: 600px; font-size: 1.25rem;">
+            A centralized dashboard to save, categorise, and share products, videos, posts, and articles from Amazon, Flipkart, Instagram, YouTube, and anywhere else.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'signup' %}" class="btn btn-primary-custom px-5 py-3 fs-5">Get Started Free</a>
+            <a href="{% url 'login' %}" class="btn btn-secondary-custom px-5 py-3 fs-5">Login</a>
+        </div>
+    </div>
+
+    <!-- Supported Platforms Grid -->
+    <div class="row text-center mt-5 pt-5 justify-content-center">
+        <h3 class="fw-700 text-white mb-4">Supported Platforms & Auto-Detection</h3>
+        <div class="d-flex flex-wrap justify-content-center gap-4 py-3" style="max-width: 800px;">
+            <div class="glass-card px-4 py-3 d-flex align-items-center gap-3">
+                <i class="bi bi-cart3 text-warning fs-3"></i>
+                <span class="fw-600 text-white">Amazon</span>
+            </div>
+            <div class="glass-card px-4 py-3 d-flex align-items-center gap-3">
+                <i class="bi bi-bag-check-fill text-primary fs-3"></i>
+                <span class="fw-600 text-white">Flipkart</span>
+            </div>
+            <div class="glass-card px-4 py-3 d-flex align-items-center gap-3">
+                <i class="bi bi-youtube text-danger fs-3"></i>
+                <span class="fw-600 text-white">YouTube</span>
+            </div>
+            <div class="glass-card px-4 py-3 d-flex align-items-center gap-3">
+                <i class="bi bi-instagram fs-3" style="color: #e6683c;"></i>
+                <span class="fw-600 text-white">Instagram</span>
+            </div>
+            <div class="glass-card px-4 py-3 d-flex align-items-center gap-3">
+                <i class="bi bi-facebook text-info fs-3"></i>
+                <span class="fw-600 text-white">Facebook</span>
+            </div>
+            <div class="glass-card px-4 py-3 d-flex align-items-center gap-3">
+                <i class="bi bi-link-45deg text-success fs-3"></i>
+                <span class="fw-600 text-white">Any Website</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="row mt-5 pt-5 g-4 text-center">
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <div class="text-primary fs-1 mb-3"><i class="bi bi-link-45deg"></i></div>
+                <h4 class="fw-700 text-white">One-Click Save</h4>
+                <p class="text-muted mb-0">Just paste a URL. We auto-detect the shop, video platform, or social feed and harvest titles, descriptions, and pictures.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <div class="text-success fs-1 mb-3"><i class="bi bi-eye-slash-fill"></i></div>
+                <h4 class="fw-700 text-white">Private or Public</h4>
+                <p class="text-muted mb-0">Keep wishlists private in "My World" or push them to the "Global World" feed for your followers and others to discover.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <div class="text-warning fs-1 mb-3"><i class="bi bi-heart-fill"></i></div>
+                <h4 class="fw-700 text-white">Social Interactions</h4>
+                <p class="text-muted mb-0">Follow friends, explore public saving feeds, like items to save them later, and drop comments directly on wishlists.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

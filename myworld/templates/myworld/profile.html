@@ -1,0 +1,151 @@
+{% extends 'myworld/base.html' %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }}'s Profile - MyWorld{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Profile Header Card -->
+    <div class="glass-card p-4 mb-5">
+        <div class="row align-items-center">
+            <!-- Profile Picture -->
+            <div class="col-md-3 text-center mb-4 mb-md-0">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="{{ profile_user.username }}" class="profile-avatar mb-2">
+                {% else %}
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="default avatar" class="profile-avatar mb-2">
+                {% endif %}
+            </div>
+            
+            <!-- Profile Bio & Information -->
+            <div class="col-md-9 text-center text-md-start text-white">
+                <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-3 mb-3">
+                    <h2 class="fw-800 mb-0">{{ profile_user.username }}</h2>
+                    
+                    {% if profile_user == request.user %}
+                        <button class="btn btn-secondary-custom btn-sm px-3 py-2 d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="bi bi-gear-fill"></i> Edit Profile
+                        </button>
+                    {% else %}
+                        <button class="follow-btn-toggle follow-btn btn-sm px-4 py-2 {% if is_following %}following{% endif %}" data-username="{{ profile_user.username }}">
+                            {% if is_following %}Following{% else %}Follow{% endif %}
+                        </button>
+                    {% endif %}
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="d-flex gap-4 justify-content-center justify-content-md-start mb-3">
+                    <div>
+                        <span class="fw-700 text-white fs-5" id="followersCount">{{ followers_count }}</span>
+                        <span class="text-muted ms-1">followers</span>
+                    </div>
+                    <div>
+                        <span class="fw-700 text-white fs-5">{{ following_count }}</span>
+                        <span class="text-muted ms-1">following</span>
+                    </div>
+                    <div>
+                        <span class="fw-700 text-white fs-5">{{ items.count }}</span>
+                        <span class="text-muted ms-1">items</span>
+                    </div>
+                </div>
+
+                <!-- Biography -->
+                <p class="lead text-muted mb-0" style="font-size: 1rem; max-width: 600px;">
+                    {{ profile.bio|default:"No bio provided yet. Keep it short and sweet!" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Grid Section -->
+    <h3 class="fw-700 text-white mb-4"><i class="bi bi-grid-fill text-primary me-2"></i>{% if profile_user == request.user %}All Saved Items{% else %}Public Board{% endif %}</h3>
+    
+    {% if items %}
+        <div class="pins-grid">
+            {% for item in items %}
+                <div class="pin-item">
+                    <div class="glass-card">
+                        
+                        <div class="card-img-container">
+                            <span class="platform-badge platform-{{ item.platform|lower }}">
+                                {{ item.platform }}
+                            </span>
+                            
+                            <!-- Privacy badge for owner -->
+                            {% if profile_user == request.user %}
+                                <span class="privacy-badge privacy-{% if item.is_public %}public{% else %}private{% endif %}">
+                                    {% if item.is_public %}<i class="bi bi-eye-fill"></i> Public{% else %}<i class="bi bi-eye-slash-fill"></i> Private{% endif %}
+                                </span>
+                            {% endif %}
+
+                            {% if item.image_url %}
+                                <img src="{{ item.image_url }}" alt="{{ item.title }}" class="card-img-top-custom">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=600&auto=format&fit=crop" alt="Placeholder" class="card-img-top-custom">
+                            {% endif %}
+                        </div>
+
+                        <div class="p-3">
+                            <h5 class="card-title-custom" title="{{ item.title }}">{{ item.title }}</h5>
+                            <p class="card-desc-custom">{{ item.description|default:"No description provided." }}</p>
+                            
+                            <!-- Price & category -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge" style="background-color: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-secondary);">
+                                    <i class="bi bi-tag-fill me-1"></i>{{ item.category }}
+                                </span>
+                                {% if item.price %}
+                                    <span class="card-price-custom">₹{{ item.price }}</span>
+                                {% endif %}
+                            </div>
+
+                            <a href="{{ item.url }}" target="_blank" class="btn btn-secondary-custom btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-1">
+                                <i class="bi bi-box-arrow-up-right"></i> Open Original Link
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5 glass-card">
+            <i class="bi bi-folder-x display-4 text-muted mb-3 d-block"></i>
+            <h4 class="text-white fw-700">No items to show</h4>
+            <p class="text-muted">This board is currently empty.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Profile Edit Modal -->
+{% if profile_user == request.user %}
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-700 text-white">Edit Profile Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'update_profile' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body py-4 text-white">
+                    <div class="mb-3">
+                        <label for="editBio" class="form-label fw-600">Bio</label>
+                        <textarea name="bio" id="editBio" rows="3" class="form-control glass-input" placeholder="Tell us about yourself...">{{ profile.bio }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPic" class="form-label fw-600">Profile Picture</label>
+                        <input type="file" name="profile_picture" id="editPic" class="form-control glass-input" accept="image/*">
+                        <div class="form-text text-muted">Upload an image file (JPG, PNG).</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-custom">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

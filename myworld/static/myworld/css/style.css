@@ -1,0 +1,407 @@
+/* Style System for MyWorld */
+
+:root {
+    /* Dark Mode Defaults */
+    --bg-primary: #0b0c10;
+    --bg-secondary: #1f2833;
+    --bg-card: rgba(31, 40, 51, 0.65);
+    --text-primary: #f5f5f7;
+    --text-secondary: #c5c6c7;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --accent-color: #6f42c1;
+    --accent-glow: rgba(111, 66, 193, 0.4);
+    --accent-hover: #5a32a3;
+    --price-color: #10b981;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --nav-bg: rgba(11, 12, 16, 0.85);
+    --backdrop-blur: blur(12px);
+    --transition-speed: 0.3s;
+}
+
+body.light-theme {
+    /* Light Mode Variables */
+    --bg-primary: #f4f5f7;
+    --bg-secondary: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.8);
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --accent-color: #6f42c1;
+    --accent-glow: rgba(111, 66, 193, 0.2);
+    --accent-hover: #5a32a3;
+    --price-color: #059669;
+    --card-shadow: 0 10px 30px rgba(111, 66, 193, 0.06);
+    --nav-bg: rgba(244, 245, 247, 0.85);
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+/* Glassmorphism Card styling */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    transition: transform var(--transition-speed) cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow var(--transition-speed) ease,
+                border-color var(--transition-speed) ease;
+    overflow: hidden;
+}
+
+.glass-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--accent-color);
+    box-shadow: 0 15px 35px var(--accent-glow);
+}
+
+/* Pinterest-style Columns */
+.pins-grid {
+    column-count: 4;
+    column-gap: 20px;
+    width: 100%;
+}
+
+@media (max-width: 1200px) {
+    .pins-grid {
+        column-count: 3;
+    }
+}
+
+@media (max-width: 900px) {
+    .pins-grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 600px) {
+    .pins-grid {
+        column-count: 1;
+    }
+}
+
+.pin-item {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 20px;
+    break-inside: avoid;
+}
+
+/* Form Styling */
+.glass-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary) !important;
+    border-radius: 10px;
+    padding: 10px 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+body.light-theme .glass-input {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem var(--accent-glow);
+    outline: none;
+}
+
+body.light-theme .glass-input:focus {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Brand badges for items */
+.platform-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.platform-amazon { background-color: #ff9900; color: #000; }
+.platform-flipkart { background-color: #2874f0; color: #fff; }
+.platform-youtube { background-color: #ff0000; color: #fff; }
+.platform-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; }
+.platform-facebook { background-color: #1877f2; color: #fff; }
+.platform-other { background-color: #6c757d; color: #fff; }
+
+.privacy-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+}
+
+.privacy-public { background-color: rgba(16, 185, 129, 0.85); color: white; }
+.privacy-private { background-color: rgba(239, 68, 68, 0.85); color: white; }
+
+/* Sticky Navbar and Sidebar blur */
+.navbar-blur {
+    background: var(--nav-bg);
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-speed) ease;
+}
+
+/* Custom buttons */
+.btn-primary-custom {
+    background-color: var(--accent-color);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 20px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--accent-hover);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.btn-secondary-custom {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 20px;
+    transition: background 0.2s;
+}
+
+.btn-secondary-custom:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+body.light-theme .btn-secondary-custom:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* Grid-item styling */
+.card-img-container {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+}
+
+.card-img-top-custom {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-speed) ease;
+}
+
+.glass-card:hover .card-img-top-custom {
+    transform: scale(1.05);
+}
+
+.card-title-custom {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+}
+
+.card-desc-custom {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 12px;
+    height: 38px;
+}
+
+.card-price-custom {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--price-color);
+}
+
+/* Likes/Comments bar */
+.interaction-bar {
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.interaction-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.interaction-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+body.light-theme .interaction-btn:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.interaction-btn.liked {
+    color: #e63946;
+}
+
+/* Follow buttons */
+.follow-btn {
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    border: 1px solid var(--accent-color);
+    background-color: transparent;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.follow-btn.following {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.follow-btn:hover {
+    background-color: var(--accent-hover);
+    color: white;
+}
+
+/* Theme toggle button styling */
+.theme-toggle-btn {
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: transform var(--transition-speed) ease, background var(--transition-speed) ease;
+}
+
+body.light-theme .theme-toggle-btn {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.theme-toggle-btn:hover {
+    transform: rotate(45deg);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Category Filter Tags */
+.filter-tags {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    scrollbar-width: none; /* Firefox */
+}
+
+.filter-tags::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.tag-btn {
+    white-space: nowrap;
+    padding: 8px 16px;
+    border-radius: 30px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.tag-btn:hover, .tag-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 10px var(--accent-glow);
+}
+
+/* Comments modal scrollable */
+.comments-list-container {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Landing Page Hero */
+.hero-section {
+    padding: 100px 0 60px 0;
+    text-align: center;
+    background: radial-gradient(circle at 50% 30%, var(--accent-glow) 0%, transparent 60%);
+}
+
+/* Custom Profile Header */
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--accent-color);
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+/* Dashboard Stat Cards */
+.stat-card {
+    padding: 24px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--accent-color);
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
